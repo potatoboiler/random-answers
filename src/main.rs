@@ -10,14 +10,15 @@ impl Student {
     pub fn new(iq: f64) -> Self {
         Self { iq: iq } // multiplier on passing probability
     }
-    pub fn take_test(&self, test: Test) -> f64 {
-        // zip(test.difficulties.iter(), test.weights.iter());
+    pub fn take_test(&self, test: &Test) -> f64 {
+        // omit answers
         let mut rng: StdRng = StdRng::from_rng(thread_rng()).unwrap();
         test.difficulties
             .iter()
             .zip(test.weights.iter())
-            .map(|(&x, &y)| -> f64 {
-                (rng.sample::<f64, Standard>(Standard) < (x / self.iq)) as i32 as f64 * y
+            .map(|(&difficulty, &weight)| -> f64 {
+                (rng.sample::<f64, Standard>(Standard) > (difficulty / self.iq)) as i32 as f64
+                    * weight
             })
             .sum::<f64>()
             / test.total_weight
@@ -54,8 +55,20 @@ pub fn make_class(size: usize, iq_distribution: impl Distribution<f64>) -> Vec<S
 
 fn main() {
     // let class: Vec<_> = make_class(5, StandardNormal);
-    let class: Vec<_> = make_class(5, Normal::new(1.0, 0.5).unwrap());
-    for student in class {
-        println!("{}", student.iq);
-    }
+    let class: Vec<_> = make_class(20000, Normal::new(1.0, 0.).unwrap());
+    let test: Test = Test::new(
+        vec![0.75, 0.75, 0.75, 0.75, 0.75, 0.75],
+        vec![1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    );
+    /*     for student in &class {
+        println!("{}", student.take_test(&test));
+    }*/
+
+    println!(
+        "{}",
+        class
+            .iter()
+            .map(|student| student.take_test(&test))
+            .sum::<f64>() / (class.len() as f64)
+    );
 }
