@@ -1,12 +1,6 @@
-use num::{cast::AsPrimitive, Float, Num};
-use std::iter::Sum;
-
 struct Student {
     iq: f64,
 }
-
-trait WeightType: Float + Sum + Copy + Ord {}
-
 impl Student {
     pub fn new(iq: f64) -> Self {
         Self { iq: iq }
@@ -16,14 +10,12 @@ impl Student {
     }
 }
 
-struct Test
-{
+struct Test {
     difficulties: Vec<f64>, // Bernoulli probabilities of passing the question
     weights: Vec<f64>, // point weights on the test, by default all questions are uniformly weighted
     total_weight: f64,
 }
-impl Test
-{
+impl Test {
     pub fn new(difficulties: Vec<f64>, weights: Vec<f64>) -> Self {
         assert_eq!(difficulties.len(), weights.len());
         assert!(weights.iter().all(|x| *x > 0.0));
